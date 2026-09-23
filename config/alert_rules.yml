@@ -1,0 +1,18 @@
+groups:
+  - name: rag_quality
+    rules:
+      - alert: RetrievalQualityDegraded
+        expr: histogram_quantile(0.5, rate(rag_retrieval_relevance_score_bucket[10m])) < 0.3
+        for: 5m
+        annotations:
+          summary: "Median retrieval confidence dropped below threshold"
+      - alert: LLMCostSpike
+        expr: rate(rag_llm_cost_usd_total[1h]) > 0.50
+        for: 10m
+        annotations:
+          summary: "LLM spend rate exceeding budget threshold"
+      - alert: GroundednessDropped
+        expr: histogram_quantile(0.5, rate(rag_groundedness_score_bucket[10m])) < 0.4
+        for: 5m
+        annotations:
+          summary: "Answers trending ungrounded relative to retrieved context"

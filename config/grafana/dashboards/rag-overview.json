@@ -1,0 +1,116 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "id": 1,
+      "title": "API Request Throughput (RPS)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "rate(rag_requests_total[1m])",
+          "legendFormat": "{{method}} {{endpoint}}"
+        }
+      ]
+    },
+    {
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "id": 2,
+      "title": "Query Latency (Seconds)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(rag_query_duration_seconds_bucket[1m]))",
+          "legendFormat": "p95 latency"
+        }
+      ]
+    },
+    {
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "id": 3,
+      "title": "Semantic Cache Hit / Miss Rate",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "rate(rag_cache_hits_total[1m])",
+          "legendFormat": "Cache Hits"
+        },
+        {
+          "expr": "rate(rag_cache_misses_total[1m])",
+          "legendFormat": "Cache Misses"
+        }
+      ]
+    },
+    {
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "id": 4,
+      "title": "Async Document Processing Queue",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "rag_celery_pending_tasks",
+          "legendFormat": "Pending Ingestion Tasks"
+        }
+      ]
+    },
+    {
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 16 },
+      "id": 5,
+      "title": "Estimated LLM API Spend Rate ($/hr)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "rate(rag_llm_cost_usd_total[5m]) * 3600",
+          "legendFormat": "{{model}} ($/hr)"
+        }
+      ]
+    },
+    {
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 16 },
+      "id": 6,
+      "title": "Top Retrieval Relevance Confidence Score",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.5, rate(rag_retrieval_relevance_score_bucket[5m]))",
+          "legendFormat": "p50 score"
+        },
+        {
+          "expr": "histogram_quantile(0.95, rate(rag_retrieval_relevance_score_bucket[5m]))",
+          "legendFormat": "p95 score"
+        }
+      ]
+    },
+    {
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 16 },
+      "id": 7,
+      "title": "Answer Groundedness Score Trend",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.5, rate(rag_groundedness_score_bucket[5m]))",
+          "legendFormat": "p50 groundedness"
+        },
+        {
+          "expr": "histogram_quantile(0.95, rate(rag_groundedness_score_bucket[5m]))",
+          "legendFormat": "p95 groundedness"
+        }
+      ]
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["rag", "fastapi", "qdrant", "telemetry"],
+  "time": { "from": "now-15m", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "RAG System Architecture Dashboard",
+  "version": 2
+}
