@@ -1,0 +1,29 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Environment secrets — NEVER commit real credentials
+.env
+
+# Local storage fallback directory (created by S3StorageManager when MinIO is unreachable)
+data_store/
+
+# Ingestion artifacts / zips should not be in the repo
+ingestion.zip
+*.zip
+
+# Test & coverage artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE
+.idea/
+.vscode/
