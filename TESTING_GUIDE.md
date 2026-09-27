@@ -12,6 +12,12 @@ Launch PostgreSQL, Redis, Qdrant, MinIO S3, and RabbitMQ:
 docker compose up -d postgres redis qdrant minio rabbitmq
 ```
 
+### 1.1 Run Database Migrations in Docker
+Apply all database migrations up to `head`:
+```bash
+docker compose run --rm migrate alembic upgrade head
+```
+
 ### 2. Start the FastAPI API Gateway
 ```bash
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload

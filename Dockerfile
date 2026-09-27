@@ -1,4 +1,3 @@
-# Multi-stage build for hardened production container
 FROM python:3.11-slim AS builder
 
 WORKDIR /app
@@ -8,14 +7,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
+
 COPY pyproject.toml README.md ./
 COPY app ./app
 COPY rag ./rag
 COPY ingestion ./ingestion
 
-RUN pip install --no-cache-dir --prefix=/install .
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv pip install --system --prefix=/install . && \
+    uv pip install --system --prefix=/install https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
 
-# Runner stage
 FROM python:3.11-slim AS runner
 
 WORKDIR /app
@@ -28,13 +30,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=builder /install /usr/local
 COPY . /app
 
-# Create non-root user for execution security
-RUN useradd -m -u 10001 appuser && chown -R appuser:appuser /app
-USER appuser
+# Line 33:
+COPY scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
 
-EXPOSE 8000
+# Lines 35-37:
+RUN chmod +x /usr/local/bin/entrypoint.sh && \
+    useradd -m -u 10001 appuser && \
+    chown -R appuser:appuser /app
 
-HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
-  CMD curl -f http://localhost:8000/health || exit 1
-
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Line 46:
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

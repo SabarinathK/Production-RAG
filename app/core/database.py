@@ -283,7 +283,7 @@ def get_qdrant_client() -> QdrantClient:
             _qdrant_client = QdrantClient(location=":memory:")
         else:
             try:
-                client = QdrantClient(host=settings.QDRANT_HOST, port=settings.QDRANT_PORT, timeout=5.0)
+                client = QdrantClient(host=settings.QDRANT_HOST, port=settings.QDRANT_PORT, timeout=5.0, check_compatibility=False)
                 client.get_collections()
                 _qdrant_client = client
             except Exception as e:
