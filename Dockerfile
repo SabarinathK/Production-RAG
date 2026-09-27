@@ -34,7 +34,8 @@ COPY . /app
 COPY scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
 
 # Lines 35-37:
-RUN chmod +x /usr/local/bin/entrypoint.sh && \
+RUN sed -i 's/\r$//' /usr/local/bin/entrypoint.sh && \
+    chmod +x /usr/local/bin/entrypoint.sh && \
     useradd -m -u 10001 appuser && \
     chown -R appuser:appuser /app
 
