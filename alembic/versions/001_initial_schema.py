@@ -39,18 +39,17 @@ def upgrade() -> None:
         sa.Column('chunk_count', sa.Integer(), nullable=False, server_default='0'),
         sa.Column('created_at', sa.DateTime(), nullable=False),
         sa.Column('status', sa.String(length=50), nullable=False, server_default='PROCESSING'),
-        sa.Column('error_detail', sa.Text(), nullable=True),
         sa.Column('meta_info', sa.JSON(), nullable=True),
         sa.PrimaryKeyConstraint('id'),
         if_not_exists=True
     )
     # Create index only if it doesn't exist
-    bind = op.get_bind()
-    inspector = sa.inspect(bind)
-    existing_indexes = [idx['name'] for idx in inspector.get_indexes('document_metadata')] if 'document_metadata' in inspector.get_table_names() else []
-    if 'ix_document_metadata_content_hash' not in existing_indexes:
-        op.create_index(op.f('ix_document_metadata_content_hash'), 'document_metadata', ['content_hash'], unique=False)
-
+    op.create_index(
+        op.f("ix_document_metadata_content_hash"),
+        "document_metadata",
+        ["content_hash"],
+        unique=False,
+    )
 
 def downgrade() -> None:
     op.drop_index(op.f('ix_document_metadata_content_hash'), table_name='document_metadata')

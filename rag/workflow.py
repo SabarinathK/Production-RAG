@@ -163,7 +163,7 @@ def build_rag_workflow():
         guardrail_router,
         {
             "end": END,
-            "query_rewrite": "query_rewrite "
+            "query_rewrite": "query_rewrite"
         }
     )
 
