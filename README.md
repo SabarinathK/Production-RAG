@@ -30,6 +30,7 @@ An enterprise-ready, mission-critical **Retrieval-Augmented Generation (RAG)** p
   - [Prerequisites](#prerequisites)
   - [Environment Configuration](#environment-configuration)
   - [Option A: Deploy Full Stack via Docker Compose (Recommended)](#option-a-deploy-full-stack-via-docker-compose-recommended)
+  - [Database Schema & Migrations in Docker (PostgreSQL & Alembic)](#database-schema--migrations-in-docker-postgresql--alembic)
   - [Option B: Local Development Setup](#option-b-local-development-setup)
 - [📡 API Reference & Usage Examples](#-api-reference--usage-examples)
   - [1. System Health Check](#1-system-health-check)
@@ -321,6 +322,47 @@ To stop and remove all containers:
 ```bash
 docker compose down
 ```
+
+---
+
+### Database Schema & Migrations in Docker (PostgreSQL & Alembic)
+
+The database schema and versioned migrations are managed using **Alembic** and executed via the dedicated `migrate` Docker container service.
+
+#### 1. Create Tables & Apply Migrations
+Run all pending migrations up to `head` in Docker:
+```bash
+docker compose run --rm migrate alembic upgrade head
+```
+
+#### 2. Check Migration Status & Revision
+Verify the active migration revision in PostgreSQL:
+```bash
+docker compose run --rm migrate alembic current
+```
+*(Expected output: `004_add_user_id_to_docs (head)`)*
+
+#### 3. Inspect PostgreSQL Tables Directly
+Inspect tables and schemas inside the PostgreSQL container via `psql`:
+```bash
+# List all public tables
+docker exec rag-postgres psql -U rag_user -d rag_db -c "\dt"
+
+# View current migration version in the database
+docker exec rag-postgres psql -U rag_user -d rag_db -c "SELECT * FROM alembic_version;"
+
+# View table schemas and indexes
+docker exec rag-postgres psql -U rag_user -d rag_db -c "\d users"
+docker exec rag-postgres psql -U rag_user -d rag_db -c "\d document_metadata"
+```
+
+#### Migration History Reference:
+| Revision ID | Description |
+| :--- | :--- |
+| `001_initial_schema` | Creates core `audit_logs` and `document_metadata` tables. |
+| `002_add_error_detail` | Adds `error_detail` column to `document_metadata` for asynchronous Celery error tracking. |
+| `003_add_users_table` | Creates `users` table with username, password hash, email, and role for JWT authentication. |
+| `004_add_user_id_to_docs` | Adds multi-tenant `user_id` column and index to `document_metadata`. |
 
 ---
 

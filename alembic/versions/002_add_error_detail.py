@@ -15,10 +15,14 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.add_column(
-        'document_metadata',
-        sa.Column('error_detail', sa.Text(), nullable=True)
-    )
+    bind = op.get_bind()
+    inspector = sa.inspect(bind)
+    existing_cols = [c['name'] for c in inspector.get_columns('document_metadata')] if 'document_metadata' in inspector.get_table_names() else []
+    if 'error_detail' not in existing_cols:
+        op.add_column(
+            'document_metadata',
+            sa.Column('error_detail', sa.Text(), nullable=True)
+        )
 
 
 def downgrade() -> None:
